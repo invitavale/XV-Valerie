@@ -122,30 +122,80 @@ function closeWelcome() {
     document.body.style.overflow = '';
 }
 
-// ---------- Sobre de inicio ----------
-// El primer toque abre el sobre y, en ese mismo toque, arranca la música
-// (así lo permiten iPhone y Android). Sale la carta con la foto y se abre
-// la invitación con un destello.
-let introStarted = false, introDone = false;
+// ---------- Sobre de inicio con video ----------
+// Al tocar: arranca la música y el video, se abre el sobre y sale la carta.
+// Luego el sobre se aparta y queda el video (cae la zapatilla); un brillo
+// cubre el humo. Al terminar el video (o con "Entrar") se abre la invitación.
+let introStarted = false, introDone = false, introRaf = 0;
+const SMOKE_IN = 5.15, SMOKE_FULL = 5.45, SMOKE_HOLD = 6.55, SMOKE_OUT = 7.45, VIDEO_END = 9.4;
 
+function smokeLevel(t) {
+    if (t < SMOKE_IN || t > SMOKE_OUT) return 0;
+    if (t < SMOKE_FULL) return (t - SMOKE_IN) / (SMOKE_FULL - SMOKE_IN);
+    if (t <= SMOKE_HOLD) return 1;
+    return 1 - (t - SMOKE_HOLD) / (SMOKE_OUT - SMOKE_HOLD);
+}
+const ENV_OPEN_AT = 3.0;   // segundo del video en que se abre el sobre
+function openEnvelope() {
+    const modal = document.getElementById('welcomeModal');
+    if (modal && !modal.classList.contains('is-open')) modal.classList.add('is-open');
+}
+function watchVideo(video, glow) {
+    let burst = false;
+    const tick = () => {
+        if (introDone) return;
+        const t = video.currentTime || 0;
+        if (t >= ENV_OPEN_AT) openEnvelope();
+        if (glow) {
+            glow.style.setProperty('--sg', smokeLevel(t).toFixed(3));
+            glow.style.setProperty('--sgy', Math.max(0, Math.min(1.3, t - 5.4)).toFixed(3));
+            if (!burst && t >= SMOKE_IN) { burst = true; glow.classList.add('burst'); }
+        }
+        if (t >= VIDEO_END) { finishIntro(); return; }
+        introRaf = requestAnimationFrame(tick);
+    };
+    introRaf = requestAnimationFrame(tick);
+}
 function startIntro() {
     if (introStarted) return;
     introStarted = true;
     const modal = document.getElementById('welcomeModal');
+    const video = document.getElementById('introVideo');
+    const glow = document.getElementById('smokeGlow');
     startMusic();
     if (!modal) return;
-    modal.classList.add('is-open');
+    modal.classList.add('is-playing');           // se oculta "Toca el sobre", el sobre se queda
+    setTimeout(() => modal.classList.add('can-skip'), 1500);
     const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    setTimeout(finishIntro, reduce ? 300 : 2600);
+    const fallback = () => { openEnvelope(); setTimeout(finishIntro, 5200); };
+    if (video && !reduce) {
+        try {
+            video.muted = true;
+            const p = video.play();
+            if (p && p.catch) p.catch(fallback);
+            video.addEventListener('ended', finishIntro, { once: true });
+            video.addEventListener('error', fallback, { once: true });
+            watchVideo(video, glow);
+        } catch (e) { fallback(); }
+    } else {
+        fallback();
+    }
+    // por si el video se queda trabado, entrar de todos modos
+    setTimeout(finishIntro, 15000);
 }
 function finishIntro() {
     if (introDone) return;
     introDone = true;
+    if (introRaf) cancelAnimationFrame(introRaf);
     if (!introStarted) { introStarted = true; startMusic(); }
     const modal = document.getElementById('welcomeModal');
     if (!modal) return;
     modal.classList.add('is-leaving');
-    setTimeout(closeWelcome, 1300);
+    setTimeout(() => {
+        closeWelcome();
+        const v = document.getElementById('introVideo');
+        if (v) { try { v.pause(); v.querySelectorAll('source').forEach(n => n.remove()); v.load(); } catch (e) {} }
+    }, 1300);
 }
 // nombres anteriores, por compatibilidad
 function enterWithMusicClick() { startIntro(); }
@@ -221,7 +271,7 @@ function updateMusicIcon() {
 
 // Countdown
 function initializeCountdown() {
-    const targetDate = new Date('2027-01-24T18:00:00-04:00').getTime();
+    const targetDate = new Date('2027-01-24T17:30:00-04:00').getTime();
     
     function updateCountdown() {
         const now = new Date().getTime();
@@ -395,7 +445,7 @@ function openLocation(location) {
 // regalos, etc.) cuando personalices la invitación.
 
 function sharePhotos() {
-    window.open('https://photos.app.goo.gl/CD3JMfxcuTyoF6ZR8', '_blank');
+    window.open('https://photos.app.goo.gl/Su7s7HGBnWVm2v3K9', '_blank');
 }
 
 function showDressCode() {
@@ -421,13 +471,14 @@ function openAmazon() {
     if (AMAZON_URL) window.open(AMAZON_URL, '_blank');
     else showToast('Muy pronto', 'La lista de Amazon estará disponible en breve.');
 }
-function copyAddress() {
-    const el = document.getElementById('amazonAddr');
+function copyText(id, msg) {
+    const el = document.getElementById(id);
     const txt = el ? el.textContent.trim() : '';
-    const done = () => showToast('Dirección copiada', 'Pégala como dirección de envío en Amazon.');
+    const done = () => showToast(msg || 'Copiado', txt);
     if (navigator.clipboard && window.isSecureContext) navigator.clipboard.writeText(txt).then(done).catch(() => fallbackCopy(txt, done));
     else fallbackCopy(txt, done);
 }
+function copyAddress() { copyText('amazonAddr', 'Dirección copiada'); }
 function fallbackCopy(txt, done) {
     const ta = document.createElement('textarea');
     ta.value = txt; ta.setAttribute('readonly', ''); ta.style.position = 'fixed'; ta.style.opacity = '0';
@@ -436,15 +487,78 @@ function fallbackCopy(txt, done) {
     ta.remove();
 }
 
-// ---------- Regalos: botón que despliega las opciones ----------
-function toggleGifts() {
-    const panel = document.getElementById('giftsPanel'), btn = document.getElementById('giftsToggle');
-    if (!panel || !btn) return;
-    const open = !panel.classList.contains('is-open');
-    panel.classList.toggle('is-open', open);
-    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
-    btn.firstChild.textContent = open ? 'Ocultar opciones' : 'Ver opciones de regalo';
+// ---------- Regalos: ventana flotante ----------
+function openGifts() {
+    const m = document.getElementById('giftsModal');
+    if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 }
+function closeGifts() {
+    const m = document.getElementById('giftsModal');
+    if (m) { m.style.display = 'none'; document.body.style.overflow = ''; }
+}
+
+// ---------- Agregar al calendario ----------
+// iPhone/Mac: archivo .ics (abre Calendario). Android y demás: Google Calendar.
+function addToCalendar() {
+    const title = 'XV Años de Valerie';
+    const place = 'Salón de eventos Club de Obras Públicas';
+    const details = '¡Te espero para celebrar mis XV años! Invitación: https://invitavale.com/XV-Valerie/';
+    const start = '20270124T213000Z', end = '20270125T033000Z';   // 5:30 p.m. a 11:30 p.m. (hora RD)
+    const ua = navigator.userAgent || '';
+    const apple = /iPhone|iPad|iPod|Macintosh/.test(ua) && !/Android/.test(ua);
+    if (apple) {
+        const ics = ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Invitavale//XV Valerie//ES', 'BEGIN:VEVENT',
+            'UID:xv-valerie-20270124@invitavale.com', 'DTSTAMP:20261117T000000Z',
+            'DTSTART:' + start, 'DTEND:' + end, 'SUMMARY:' + title, 'LOCATION:' + place,
+            'DESCRIPTION:' + details, 'BEGIN:VALARM', 'TRIGGER:-P1D', 'ACTION:DISPLAY', 'DESCRIPTION:Mañana: ' + title, 'END:VALARM',
+            'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+        const a = document.createElement('a');
+        a.href = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
+        a.download = 'XV-Valerie.ics';
+        document.body.appendChild(a); a.click(); a.remove();
+    } else {
+        const url = 'https://calendar.google.com/calendar/render?action=TEMPLATE'
+            + '&text=' + encodeURIComponent(title)
+            + '&dates=' + start + '/' + end
+            + '&details=' + encodeURIComponent(details)
+            + '&location=' + encodeURIComponent(place)
+            + '&ctz=America/Santo_Domingo';
+        window.open(url, '_blank');
+    }
+}
+
+// ---------- Carta: el texto se escribe solo al llegar ----------
+(function () {
+    function init() {
+        const p = document.getElementById('cartaTxt');
+        const box = document.getElementById('vCarta');
+        if (!p || !box) return;
+        const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduce) return;
+        const text = p.textContent;
+        p.textContent = '';
+        const spans = [];
+        for (const ch of text) { const s = document.createElement('span'); s.className = 'ch'; s.textContent = ch; s.setAttribute('aria-hidden', 'true'); p.appendChild(s); spans.push(s); }
+        const caret = document.createElement('span'); caret.className = 'caret'; caret.setAttribute('aria-hidden', 'true');
+        let started = false;
+        function type() {
+            if (started) return; started = true;
+            let i = 0;
+            const step = () => {
+                if (i >= spans.length) { setTimeout(() => caret.remove(), 1600); return; }
+                spans[i].classList.add('on');
+                spans[i].after(caret);
+                const c = spans[i].textContent; i++;
+                setTimeout(step, c === '.' ? 320 : c === ',' ? 180 : 32);
+            };
+            setTimeout(step, 700);
+        }
+        if (!('IntersectionObserver' in window)) { type(); return; }
+        const io = new IntersectionObserver(en => { if (en[0].isIntersecting) { type(); io.disconnect(); } }, { threshold: 0.45 });
+        io.observe(box);
+    }
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
 
 // ---------- Elegir número de WhatsApp ----------
 function openWaChooser() {
@@ -464,16 +578,13 @@ function confirmWhatsApp(e, phone) {
 }
 
 // ---------- Canción que no puede faltar ----------
+// Abre WhatsApp con el mensaje listo; el invitado solo escribe la canción.
 // CAMBIAR: número que recibe las recomendaciones
 const SONG_PHONE = '18093532299';
 function recommendSong(e) {
     if (e) e.preventDefault();
-    const input = document.getElementById('songInput');
-    const song = input ? input.value.trim() : '';
-    if (!song) { showToast('Escribe una canción', 'Pon el nombre de la canción y el artista.'); if (input) input.focus(); return; }
-    const msg = '¡Hola! Para los XV de Valerie, la canción que no puede faltar es: ' + song + ' 🎶';
+    const msg = '¡Hola! 🎶 Para los XV de Valerie, la canción que no puede faltar es: ';
     window.open('https://wa.me/' + SONG_PHONE + '?text=' + encodeURIComponent(msg), '_blank');
-    input.value = '';
 }
 
 // ---------- Fotos de pequeña: cinta infinita de derecha a izquierda ----------
@@ -546,17 +657,23 @@ function showToast(title, message) {
         ['.r-crown, .r-sunrow img, .r-sun-sm, .r-medallion, .v-carta-tiara, .v-reloj-sm', 'rv-pop', 0.1],
         ['.v-strip, .v-lugar, .v-wa', 'rv-up', 0.1],
         ['.r-title, .r-name, .r-date, .r-cal, .r-cd-item, .r-btn, .r-photo-band, .r-arch', 'rv-up', 0.08],
-        ['.r-flourish, .v-carroza, .v-reloj-sm, .r-cal-kicker, .r-cal-month', 'rv-zoom', 0.06],
+        ['.r-flourish, .v-carroza, .v-reloj-sm, .r-cal-kicker, .r-cal-month, .v-cal-hint', 'rv-zoom', 0.06],
+        ['.v-deadline', 'rv-up', 0],
         ['.content .r-text, .r-sub-light, .r-note, .v-label, .v-place, .v-time, .r-caps, .v-song-form, .v-rsvp-btns, .r-footer-with, .r-footer-name', 'rv-up', 0.08],
         ['.r-farol, .v-rsvp-tiara', 'rv-left', 0]
     ];
 
+    // lo que ya anima el CSS con el scroll (navegadores modernos) no lo toca este script
+    var SD = '.r-card, .v-deadline, .v-carta, .r-title, .v-lugar, .r-cal, .v-strip, .r-cd-item, .r-medallion';
+    var sdOn = window.CSS && CSS.supports && CSS.supports('animation-timeline: view()');
+
     function init() {
         var seen = new Set(), items = [];
+        if (sdOn) document.querySelectorAll(SD).forEach(function (el) { seen.add(el); });
         groups.forEach(function (g) {
             var list = document.querySelectorAll(g[0]), byParent = new Map();
             list.forEach(function (el) {
-                if (seen.has(el) || el.closest('.hero-section, #welcomeModal')) return;
+                if (seen.has(el) || el.closest('.hero-section, #welcomeModal, .modal-overlay')) return;
                 seen.add(el);
                 var k = byParent.get(el.parentElement) || 0;
                 byParent.set(el.parentElement, k + 1);
@@ -579,7 +696,7 @@ function showToast(title, message) {
                     el.style.removeProperty('--rd');
                 }, (d + 1.3) * 1000);
             });
-        }, { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+        }, { rootMargin: '0px 0px -4% 0px', threshold: 0.01 });
 
         items.forEach(function (el) { io.observe(el); });
     }
@@ -627,4 +744,4 @@ function showToast(title, message) {
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
 })();
 
-document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { closeWaChooser(); closeDressCodeModal(); } });
+document.addEventListener('keydown', ev => { if (ev.key === 'Escape') { closeWaChooser(); closeDressCodeModal(); closeGifts(); } });

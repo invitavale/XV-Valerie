@@ -5,23 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Valerie - Mis XV Años</title>
     <meta name="theme-color" content="#4F79B3">
-    <meta name="description" content="Te invito a celebrar mis XV años · Domingo 24 de enero de 2027 · 6:00 p.m. · Club de Obras Públicas">
+    <meta name="description" content="Te invito a celebrar mis XV años · Domingo 24 de enero de 2027 · 5:30 p.m. · Club de Obras Públicas">
     <!-- Vista previa al compartir (WhatsApp, Facebook, etc.) -->
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Invitavale">
     <meta property="og:url" content="https://invitavale.com/XV-Valerie/">
     <meta property="og:title" content="Valerie · Mis XV Años">
-    <meta property="og:description" content="Te invito a celebrar mis XV años 💙 Domingo 24 de enero de 2027 · 6:00 p.m. · Club de Obras Públicas">
-    <meta property="og:image" content="https://invitavale.com/XV-Valerie/img/og-portada.jpg?v=2">
-    <meta property="og:image:secure_url" content="https://invitavale.com/XV-Valerie/img/og-portada.jpg?v=2">
+    <meta property="og:description" content="Te invito a celebrar mis XV años 💙 Domingo 24 de enero de 2027 · 5:30 p.m. · Club de Obras Públicas">
+    <meta property="og:image" content="https://invitavale.com/XV-Valerie/img/og-portada.jpg?v=3">
+    <meta property="og:image:secure_url" content="https://invitavale.com/XV-Valerie/img/og-portada.jpg?v=3">
     <meta property="og:image:type" content="image/jpeg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
     <meta property="og:image:alt" content="Valerie en sus XV años">
     <meta property="og:locale" content="es_DO">
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:image" content="https://invitavale.com/XV-Valerie/img/og-portada.jpg?v=2">
+    <meta name="twitter:image" content="https://invitavale.com/XV-Valerie/img/og-portada.jpg?v=3">
     <link rel="preload" as="image" href="img/portada.webp">
+    <link rel="preload" as="image" href="img/sobre/intro-poster.jpg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@400;500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -33,22 +34,37 @@
     <div class="main-center">
         <!-- ============ INICIO: SOBRE QUE SE ABRE ============ -->
         <div id="welcomeModal" class="modal-overlay env-overlay" role="button" tabindex="0" aria-label="Toca para abrir la invitación" onclick="startIntro()">
-            <div class="env-sky" aria-hidden="true"></div>
-            <div class="env-glitter" aria-hidden="true"></div>
+            <!-- Video de fondo (se reproduce al tocar el sobre) -->
+            <div class="env-video" aria-hidden="true">
+                <div class="env-video-box">
+                    <video id="introVideo" muted playsinline preload="auto" poster="img/sobre/intro-poster.jpg">
+                        <source src="intro.mp4" type="video/mp4">
+                    </video>
+                    <!-- Brillo que disimula el humo cuando cae la zapatilla -->
+                    <div class="smoke-glow" id="smokeGlow">
+                        <span class="sg-core"></span>
+                        <span class="sg-halo"></span>
+                        <span class="sg-glitter"></span>
+                        <span class="sg-rays"></span>
+                        <i class="sg-star s1"></i><i class="sg-star s2"></i><i class="sg-star s3"></i><i class="sg-star s4"></i><i class="sg-star s5"></i><i class="sg-star s6"></i><i class="sg-star s7"></i><i class="sg-star s8"></i><i class="sg-star s9"></i><i class="sg-star s10"></i><i class="sg-star s11"></i><i class="sg-star s12"></i><i class="sg-star s13"></i><i class="sg-star s14"></i>
+                    </div>
+                </div>
+            </div>
             <div class="env-stage">
                 <p class="env-kicker">Tienes una invitación</p>
                 <div class="env" aria-hidden="true">
-                    <div class="env-back"></div>
+                    <img class="env-back" src="img/sobre/env-back.webp" alt="">
                     <div class="env-letter">
                         <img src="img/portada.webp" alt="">
                         <span class="env-letter-name">Valerie</span>
                     </div>
-                    <div class="env-front"></div>
-                    <div class="env-flap"></div>
-                    <div class="env-seal"><span>V</span></div>
+                    <img class="env-front" src="img/sobre/env-front.webp" alt="">
+                    <img class="env-flap" src="img/sobre/env-flap.webp" alt="">
+                    <img class="env-seal" src="img/sobre/env-seal.webp" alt="">
                 </div>
                 <span class="env-hint">Toca el sobre para abrir</span>
             </div>
+            <button class="env-skip" type="button" onclick="event.stopPropagation(); finishIntro()">Entrar ›</button>
             <div class="env-flash" aria-hidden="true"></div>
         </div>
 
@@ -63,6 +79,7 @@
             <audio id="bgMusic" src="musica.mp3" preload="auto" loop playsinline></audio>
         </div>
 
+        <div class="scroll-progress" aria-hidden="true"></div>
         <div class="page" id="page">
         <!-- ============ PORTADA: foto + nombre + Mis XV años ============ -->
         <div class="hero-section">
@@ -123,7 +140,6 @@
             </div>
             <h2 class="r-title">Así comenzó mi cuento</h2>
             <svg class="r-flourish" viewBox="0 0 240 16" aria-hidden="true"><path d="M2 8h92M146 8h92"/><path d="M104 8c6-6 10-6 16 0-6 6-10 6-16 0zM120 8c6-6 10-6 16 0-6 6-10 6-16 0z"/><circle cx="120" cy="8" r="2.4" class="f"/></svg>
-            <p class="r-text">Quince años de recuerdos, sonrisas y sueños.</p>
             <div class="v-strip" aria-label="Fotos de Valerie de pequeña">
                 <div class="v-strip-track" id="vStrip">
                     <figure class="v-pic"><img src="img/ninez/n1.webp" alt="Valerie de pequeña" loading="lazy"></figure>
@@ -140,7 +156,8 @@
         <!-- Texto de la invitación dentro de un sobre -->
         <section class="r-sec v-carta-sec">
             <figure class="v-carta v-carta-img" id="vCarta">
-                <img src="img/carta.webp" alt="Me haría mucha ilusión que me acompañes a celebrar mis XV años. Es un momento especial para mí y me encantaría compartirlo con las personas que más quiero. Tu presencia haría que esta noche sea aún más inolvidable." loading="lazy">
+                <img src="img/carta-vacia.webp" alt="" loading="lazy">
+                <p class="v-carta-txt" id="cartaTxt" aria-label="Me haría mucha ilusión que me acompañes a celebrar mis XV años. Es un momento especial para mí y me encantaría compartirlo con las personas que más quiero. Tu presencia haría que esta noche sea aún más inolvidable.">Me haría mucha ilusión que me acompañes a celebrar mis XV años. Es un momento especial para mí y me encantaría compartirlo con las personas que más quiero. Tu presencia haría que esta noche sea aún más inolvidable.</p>
                 <span class="v-carta-shine" aria-hidden="true"></span>
             </figure>
         </section>
@@ -151,12 +168,13 @@
             <div class="r-date">
                 <p class="r-date-day">Domingo</p>
                 <p class="r-date-full">24 de enero de 2027</p>
-                <p class="r-date-time">6:00 PM</p>
+                <p class="r-date-time">5:30 PM</p>
             </div>
-            <div class="r-cal" aria-label="Calendario: domingo 24 de enero de 2027">
+            <div class="r-cal v-cal-btn" role="button" tabindex="0" aria-label="Agregar a mi calendario: domingo 24 de enero de 2027" onclick="addToCalendar()" onkeydown="if(event.key==='Enter')addToCalendar()">
                 <p class="r-cal-kicker">¡Agéndalo!</p>
                 <p class="r-cal-month">Enero 2027</p>
                 <div class="r-cal-grid" id="rCalGrid"></div>
+                <p class="v-cal-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M12 13v5M9.5 15.5h5"/></svg>Toca para agendarlo</p>
             </div>
             <div class="v-faltan">
                 <img class="v-reloj-sm" src="img/cen/reloj.webp" alt="" aria-hidden="true">
@@ -182,7 +200,7 @@
                 <p class="v-label">Dónde</p>
                 <p class="v-place">Salón de eventos<br><b>Club de Obras Públicas</b></p>
                 <p class="v-label">Hora de llegada</p>
-                <p class="v-time">6:00 PM</p>
+                <p class="v-time">5:30 PM</p>
                 <p class="r-note">Te esperamos puntual para disfrutar cada momento</p>
                 <button class="r-btn" onclick="openLocation('reception')">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 0 0-14 0c0 5.8 7 12 7 12z"/><circle cx="12" cy="10" r="2.6"/></svg>
@@ -195,41 +213,6 @@
         <div class="r-photo-band v-band" aria-hidden="true">
             <div class="r-photo-inner"><img src="img/horizontal.webp" alt="" loading="lazy"></div>
         </div>
-
-        <!-- Itinerario (azul). EJEMPLO: cambiar horas y actividades -->
-        <div class="r-torn r-torn-in" aria-hidden="true"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path class="t-main" d="M0,70 L0.0,66.0 L6.4,66.6 L13.2,63.9 L20.6,60.9 L26.9,59.5 L32.8,58.5 L39.9,65.3 L45.0,58.6 L52.1,57.6 L59.5,50.3 L67.4,55.9 L70.9,55.8 L82.1,53.0 L87.0,55.4 L92.9,55.0 L101.1,53.6 L106.6,54.5 L111.6,51.9 L117.7,51.9 L126.1,53.3 L135.6,55.0 L141.2,53.3 L148.4,53.9 L152.9,52.5 L161.1,52.5 L167.2,54.1 L172.6,53.5 L182.4,53.1 L187.9,52.8 L192.9,52.6 L201.6,50.0 L207.0,50.9 L213.9,53.4 L217.9,49.8 L224.3,46.6 L235.8,44.4 L242.1,45.1 L245.7,43.3 L255.2,40.6 L258.5,37.2 L266.5,37.3 L272.9,38.1 L280.2,35.4 L287.8,34.8 L291.4,34.3 L297.6,33.7 L304.2,35.2 L315.8,34.0 L318.7,32.0 L325.4,32.0 L333.8,30.9 L339.7,32.9 L346.3,33.3 L351.5,33.7 L360.0,30.5 L365.0,29.7 L372.1,28.1 L381.6,28.4 L388.4,26.7 L390.8,27.0 L400.5,28.1 L405.8,29.0 L411.9,31.0 L421.7,32.3 L424.3,29.1 L432.7,32.2 L438.4,26.5 L447.7,24.8 L452.1,27.1 L461.3,28.6 L464.2,29.6 L475.0,30.5 L479.9,30.6 L487.9,33.0 L491.5,34.1 L498.9,34.0 L506.6,30.6 L511.1,27.5 L522.0,28.1 L526.4,25.8 L533.8,25.7 L538.9,23.5 L545.1,20.4 L554.5,23.0 L558.9,23.4 L567.1,22.8 L574.1,29.1 L578.7,23.1 L587.1,24.2 L592.7,25.2 L599.8,23.6 L607.6,26.6 L611.5,25.7 L619.9,18.5 L625.4,29.3 L633.1,27.3 L641.0,29.8 L646.9,29.0 L652.1,28.2 L658.1,29.8 L665.6,20.8 L672.5,29.7 L681.2,28.9 L689.0,27.1 L694.5,27.3 L700.9,24.1 L707.3,23.6 L715.6,25.2 L718.1,22.8 L729.1,25.9 L733.9,24.1 L740.1,28.3 L745.8,25.4 L752.9,18.9 L759.1,27.4 L767.0,19.0 L773.4,24.1 L780.1,23.0 L788.9,25.2 L791.4,25.1 L798.2,27.9 L807.6,28.4 L813.6,26.0 L818.2,24.8 L828.8,25.5 L832.1,27.7 L841.1,27.3 L844.3,24.7 L852.8,24.8 L859.2,23.6 L866.0,21.7 L874.7,18.7 L882.3,20.6 L888.0,20.0 L895.6,17.6 L897.9,14.8 L907.9,17.1 L911.6,14.6 L918.6,15.3 L924.4,14.4 L933.0,16.5 L941.4,18.9 L946.5,16.6 L954.1,19.0 L957.5,19.0 L965.4,17.7 L973.8,20.6 L978.8,22.0 L988.2,23.4 L992.0,22.2 L1000.0,21.4 L1000,70Z"/></svg></div>
-        <section class="r-dark r-itin">
-            <h2 class="r-title r-title-light">Itinerario</h2>
-            <svg class="r-flourish r-flourish-light" viewBox="0 0 240 16" aria-hidden="true"><path d="M2 8h92M146 8h92"/><path d="M104 8c6-6 10-6 16 0-6 6-10 6-16 0zM120 8c6-6 10-6 16 0-6 6-10 6-16 0z"/><circle cx="120" cy="8" r="2.4" class="f"/></svg>
-            <p class="r-sub-light">Así viviremos juntos esta noche de cuento.</p>
-            <div class="r-tl">
-                <div class="r-tl-item">
-                    <div class="r-tl-ico"><img src="img/itinerario/it-iglesia.webp" alt="" loading="lazy"></div>
-                    <div class="r-tl-txt"><b>6:00 PM</b><span>Recepción</span><small>Llegada y bienvenida de los invitados.</small></div>
-                </div>
-                <div class="r-tl-item">
-                    <div class="r-tl-ico"><img src="img/itinerario/it-tiara.webp" alt="" loading="lazy"></div>
-                    <div class="r-tl-txt"><b>7:00 PM</b><span>Entrada de la quinceañera</span><small>El momento de recibir a Valerie.</small></div>
-                </div>
-                <div class="r-tl-item">
-                    <div class="r-tl-ico"><img src="img/itinerario/it-nota.webp" alt="" loading="lazy"></div>
-                    <div class="r-tl-txt"><b>7:30 PM</b><span>Vals</span><small>Su primer baile como quinceañera.</small></div>
-                </div>
-                <div class="r-tl-item">
-                    <div class="r-tl-ico"><img src="img/itinerario/it-cena.webp" alt="" loading="lazy"></div>
-                    <div class="r-tl-txt"><b>8:30 PM</b><span>Cena</span><small>Compartir, cenar y celebrar juntos.</small></div>
-                </div>
-                <div class="r-tl-item">
-                    <div class="r-tl-ico"><img src="img/itinerario/it-copas.webp" alt="" loading="lazy"></div>
-                    <div class="r-tl-txt"><b>9:30 PM</b><span>Brindis y pastel</span><small>Un brindis por sus quince años.</small></div>
-                </div>
-                <div class="r-tl-item">
-                    <div class="r-tl-ico"><img src="img/itinerario/it-disco.webp" alt="" loading="lazy"></div>
-                    <div class="r-tl-txt"><b>10:00 PM</b><span>¡Hora loca!</span><small>Música, baile y mucha diversión.</small></div>
-                </div>
-            </div>
-        </section>
-        <div class="r-torn r-torn-out" aria-hidden="true"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path class="t-main" d="M0,0 L0.0,26.8 L6.9,29.9 L14.1,32.2 L20.1,35.3 L25.9,38.6 L35.0,40.1 L38.6,39.5 L45.7,36.9 L55.2,42.3 L62.3,35.3 L64.4,35.5 L74.5,42.6 L80.4,41.8 L87.5,40.8 L95.3,40.1 L100.7,38.2 L106.6,41.2 L114.0,39.7 L121.1,39.3 L126.4,39.9 L132.6,41.3 L139.1,40.3 L147.0,41.8 L154.7,39.0 L158.7,38.0 L165.7,40.0 L171.1,38.7 L181.3,41.8 L186.2,42.8 L192.2,35.5 L200.0,36.1 L207.0,38.6 L214.4,38.8 L221.0,39.0 L225.4,39.2 L232.5,39.4 L240.4,41.4 L248.0,40.8 L254.8,39.9 L262.0,40.6 L265.1,40.0 L275.0,40.9 L281.4,40.1 L287.1,40.1 L295.6,40.1 L300.3,40.1 L307.2,45.0 L313.2,41.8 L318.8,42.0 L325.5,39.7 L331.8,42.2 L337.9,44.8 L344.4,44.0 L351.4,43.4 L361.8,45.3 L367.8,44.9 L375.8,46.7 L382.1,45.8 L388.1,43.0 L394.1,39.9 L402.3,41.4 L408.9,42.5 L410.8,43.1 L418.9,36.2 L424.4,41.3 L431.0,42.5 L438.2,45.2 L446.3,46.7 L451.3,45.2 L458.2,47.1 L465.8,49.9 L471.0,48.2 L479.2,42.9 L488.3,42.9 L492.7,41.7 L498.6,43.5 L506.7,43.4 L512.8,39.7 L518.6,37.5 L525.0,40.1 L531.1,36.5 L539.4,38.0 L544.5,34.3 L552.9,31.3 L557.8,31.4 L566.4,28.3 L575.2,27.8 L581.9,26.0 L589.1,25.6 L592.5,23.4 L602.2,25.9 L605.3,28.6 L613.0,29.3 L620.0,28.3 L627.2,27.9 L632.3,27.7 L637.5,26.6 L646.9,27.0 L651.0,24.8 L660.1,22.8 L664.2,18.6 L671.3,22.1 L677.6,19.3 L687.4,15.8 L691.5,14.5 L700.1,14.2 L708.1,13.8 L710.9,13.4 L717.6,14.2 L725.6,16.5 L733.4,9.8 L741.7,15.1 L745.7,13.5 L754.6,11.9 L759.1,12.6 L765.6,11.2 L772.7,11.0 L777.9,10.8 L784.8,13.0 L793.1,15.4 L799.6,17.0 L809.0,14.3 L811.2,15.6 L822.0,6.5 L825.2,15.5 L834.5,16.0 L841.2,12.8 L849.0,16.0 L853.4,9.1 L858.6,15.0 L865.0,16.4 L875.4,18.5 L881.9,17.2 L886.8,14.8 L895.5,16.5 L898.0,19.6 L907.2,21.0 L913.2,20.3 L921.7,20.9 L929.0,24.3 L932.7,24.9 L938.5,25.6 L944.4,24.8 L951.7,26.2 L961.6,25.4 L965.7,23.2 L971.5,29.7 L979.3,27.1 L986.6,24.7 L995.5,28.3 L1000.0,27.7 L1000,0Z"/></svg></div>
 
         <!-- Detalles (papel, cada uno en su tarjeta) -->
         <section class="r-sec r-details">
@@ -246,10 +229,7 @@
                     <div class="r-icon"><img src="img/itinerario/it-nota.webp" alt="" class="icon-img v-song-ico"></div>
                     <h3 class="r-card-title">¿Qué canción no puede faltar en la fiesta?</h3>
                     <p class="r-text">Recomiéndame esa canción que te hará salir a bailar.</p>
-                    <form class="v-song-form" onsubmit="recommendSong(event)">
-                        <input id="songInput" type="text" placeholder="Canción y artista" maxlength="120" autocomplete="off" aria-label="Canción y artista">
-                        <button class="r-btn" type="submit">Recomendar</button>
-                    </form>
+                    <button class="r-btn" type="button" onclick="recommendSong()">Recomendar</button>
                 </article>
                 <!-- EJEMPLO: cambiar el enlace del álbum o quitar esta tarjeta -->
                 <article class="r-card">
@@ -290,32 +270,7 @@
             <h2 class="r-title r-title-light">¡El mejor regalo es tu presencia!</h2>
             <svg class="r-flourish r-flourish-light" viewBox="0 0 240 16" aria-hidden="true"><path d="M2 8h92M146 8h92"/><path d="M104 8c6-6 10-6 16 0-6 6-10 6-16 0zM120 8c6-6 10-6 16 0-6 6-10 6-16 0z"/><circle cx="120" cy="8" r="2.4" class="f"/></svg>
             <p class="r-sub-light">Pero, si deseas hacerme algún obsequio, aquí te dejo algunas opciones.</p>
-            <button class="r-btn r-btn-light v-gifts-toggle" id="giftsToggle" aria-expanded="false" aria-controls="giftsPanel" onclick="toggleGifts()">Ver opciones de regalo</button>
-            <div class="v-gifts-panel" id="giftsPanel">
-            <div class="v-gifts">
-                <article class="v-gift">
-                    <span class="v-gift-num">1</span>
-                    <h3>Lista de Amazon</h3>
-                    <p>Elige un detalle de mi lista y envíalo a la dirección indicada.</p>
-                    <!-- CAMBIAR: dirección de envío -->
-                    <p class="v-gift-addr" id="amazonAddr">Dirección de envío pendiente</p>
-                    <div class="v-gift-actions">
-                        <button class="r-btn r-btn-light" onclick="openAmazon()">Ver lista</button>
-                        <button class="v-link-btn" onclick="copyAddress()">Copiar dirección</button>
-                    </div>
-                </article>
-                <article class="v-gift">
-                    <span class="v-gift-num">2</span>
-                    <h3>Gift Card de Sara</h3>
-                    <p>Una gift card de tiendas Sara para escoger lo que más me guste.</p>
-                </article>
-                <article class="v-gift">
-                    <span class="v-gift-num">3</span>
-                    <h3>Lluvia de sobres</h3>
-                    <p>El día de la fiesta habrá un buzón especial para recibir tu sobre.</p>
-                </article>
-            </div>
-            </div>
+            <button class="r-btn r-btn-light" type="button" onclick="openGifts()">Ver opciones de regalo</button>
         </section>
 
         <div class="r-torn r-torn-out r-torn-flip" aria-hidden="true"><svg viewBox="0 0 1000 70" preserveAspectRatio="none"><path class="t-main" d="M0,0 L0.0,4.4 L8.6,3 L11.7,4.2 L19.1,4.1 L25.2,5.3 L31.5,7.4 L37.8,7.0 L47.3,4.5 L55.3,5.3 L58.2,4.0 L68.8,3 L73.9,3 L78.2,3 L86.9,9.1 L91.8,3.1 L100.2,3.7 L104.5,4.6 L115.0,7.9 L121.6,10.9 L125.0,13.0 L135.0,10.4 L137.9,10.0 L147.2,18.4 L150.9,13.5 L160.7,10.9 L167.2,9.8 L171.5,8.9 L178.2,6.8 L188.1,9.5 L194.9,12.0 L201.6,14.9 L205.3,15.0 L213.5,14.3 L219.5,15.7 L225.3,13.8 L235.5,16.4 L238.7,10.8 L248.3,20.3 L251.6,18.0 L261.8,21.3 L266.3,24.1 L273.3,22.2 L281.0,22.5 L286.1,24.6 L292.9,23.6 L301.4,23.8 L307.1,21.8 L314.2,22.8 L319.2,21.7 L328.7,23.5 L333.3,24.7 L338.5,27.3 L347.9,26.6 L353.0,19.2 L359.2,27.4 L366.4,27.2 L375.7,26.0 L378.7,26.4 L385.1,34.3 L392.1,29.8 L402.1,30.8 L407.3,32.4 L414.3,34.1 L422.5,34.3 L427.5,38.1 L431.3,41.2 L440.2,42.9 L444.5,41.6 L452.9,40.2 L462.4,42.6 L464.4,42.1 L471.7,44.4 L480.0,44.7 L485.3,42.3 L495.8,42.1 L501.1,41.7 L507.6,41.0 L511.8,43.5 L522.3,34.1 L526.6,44.3 L535.3,46.5 L542.5,50.0 L546.4,51.4 L552.0,52.0 L557.9,51.0 L568.4,52.8 L573.0,53.2 L580.4,53.6 L588.2,53.9 L591.8,54.3 L598.4,49.4 L608.9,53.2 L615.2,55.0 L620.1,55.5 L628.3,55.7 L634.5,56.0 L638.9,56.2 L647.3,56.4 L654.8,56.6 L659.1,56.8 L664.5,56.9 L674.8,57.1 L679.4,61.1 L686.0,57.2 L692.1,57.0 L700.3,65.1 L707.1,57.5 L711.6,57.5 L720.5,57.6 L727.5,54.9 L731.3,56.5 L738.4,57.5 L748.5,57.5 L750.9,54.4 L761.0,53.9 L765.3,53.2 L772.4,51.1 L779.4,49.3 L786.0,46.7 L791.1,38.8 L799.1,49.0 L806.9,52.0 L813.7,49.1 L822.0,46.5 L826.8,48.8 L830.9,45.5 L837.7,56.2 L845.4,46.3 L853.6,38.9 L858.6,43.9 L867.9,44.6 L873.7,41.6 L880.9,40.4 L886.5,40.8 L893.6,39.9 L898.6,47.1 L906.8,44.9 L912.6,41.8 L920.3,43.8 L928.0,44.8 L934.5,43.5 L938.3,45.3 L944.7,44.7 L950.9,46.2 L960.6,45.4 L966.1,46.2 L974.5,46.7 L979.2,43.4 L986.6,43.7 L992.4,46.2 L1000.0,48.1 L1000,0Z"/></svg></div>
@@ -325,6 +280,11 @@
             <h2 class="r-title">Confirma tu Asistencia</h2>
             <svg class="r-flourish" viewBox="0 0 240 16" aria-hidden="true"><path d="M2 8h92M146 8h92"/><path d="M104 8c6-6 10-6 16 0-6 6-10 6-16 0zM120 8c6-6 10-6 16 0-6 6-10 6-16 0z"/><circle cx="120" cy="8" r="2.4" class="f"/></svg>
             <p class="r-text">¡Quiero compartir este momento tan esperado contigo! Por favor ayúdanos confirmando tu asistencia.</p>
+            <div class="v-deadline">
+                <p class="v-label">Fecha límite de confirmación</p>
+                <p class="v-deadline-date">1 de diciembre de 2026</p>
+                <p class="r-note">Al no recibir confirmación, daremos por hecho que no asistirá</p>
+            </div>
             <span class="v-wa" aria-hidden="true">
                 <svg viewBox="0 0 32 32"><path d="M16 3.2A12.7 12.7 0 0 0 5.1 22.4L3.3 28.8l6.6-1.7A12.7 12.7 0 1 0 16 3.2zm0 23.2c-2 0-3.9-.5-5.6-1.5l-.4-.2-3.9 1 1-3.8-.3-.4A10.5 10.5 0 1 1 16 26.4zm5.8-7.9c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.6 8.6 0 0 1-4.3-3.7c-.3-.6.3-.5.9-1.7.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.6 5.7 5 2.1.9 3 1 4 .8.7-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5l-.6-.4z"/></svg>
             </span>
@@ -362,6 +322,50 @@
             </div>
         </div>
 
+        <!-- Modal: opciones de regalo -->
+        <div id="giftsModal" class="modal-overlay" onclick="closeGifts(event)">
+            <div class="gifts-modal-v" onclick="event.stopPropagation()" role="dialog" aria-labelledby="giftsTitle">
+                <button class="modal-close" onclick="closeGifts()" aria-label="Cerrar">&times;</button>
+                <img class="gm-icon" src="icono-regalo.png" alt="" aria-hidden="true">
+                <h2 class="gm-title" id="giftsTitle">Opciones de regalo</h2>
+                <p class="gm-sub">Gracias por tu cariño 💙</p>
+                <div class="gm-list">
+                    <article class="v-gift">
+                        <span class="v-gift-num">1</span>
+                        <h3>Lista de Amazon</h3>
+                        <p>Elige un detalle de mi lista y envíalo a la dirección indicada.</p>
+                        <!-- CAMBIAR: dirección de envío -->
+                        <p class="v-gift-addr" id="amazonAddr">Dirección de envío pendiente</p>
+                        <div class="v-gift-actions">
+                            <button class="r-btn r-btn-light" onclick="openAmazon()">Ver lista</button>
+                            <button class="v-link-btn" onclick="copyText('amazonAddr', 'Dirección copiada')">Copiar dirección</button>
+                        </div>
+                    </article>
+                    <article class="v-gift">
+                        <span class="v-gift-num">2</span>
+                        <h3>Transferencia</h3>
+                        <p>Puedes realizar una transferencia a la cuenta de ahorros:</p>
+                        <dl class="v-bank">
+                            <dt>Banco</dt><dd>Banco Popular</dd>
+                            <dt>Cuenta de ahorros</dt><dd><span id="bankAcc">731024808</span> <button class="v-copy" onclick="copyText('bankAcc', 'Número de cuenta copiado')" aria-label="Copiar número de cuenta"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg></button></dd>
+                            <dt>Cédula</dt><dd><span id="bankCed">013-0044088-8</span> <button class="v-copy" onclick="copyText('bankCed', 'Cédula copiada')" aria-label="Copiar cédula"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg></button></dd>
+                            <dt>A nombre de</dt><dd>Erica Tejeda</dd>
+                        </dl>
+                    </article>
+                    <article class="v-gift">
+                        <span class="v-gift-num">3</span>
+                        <h3>Gift Card de Zara</h3>
+                        <p>Una gift card de Zara para escoger lo que más me guste.</p>
+                    </article>
+                    <article class="v-gift">
+                        <span class="v-gift-num">4</span>
+                        <h3>Lluvia de sobres</h3>
+                        <p>El día de la fiesta habrá un buzón especial para recibir tus sobres.</p>
+                    </article>
+                </div>
+            </div>
+        </div>
+
         <!-- Modal: elegir número de WhatsApp -->
         <div id="waModal" class="modal-overlay" onclick="closeWaChooser(event)">
             <div class="dresscode-modal wa-modal" onclick="event.stopPropagation()" role="dialog" aria-labelledby="waTitle">
@@ -369,9 +373,8 @@
                 <h2 class="modal-title-dark" id="waTitle">Confirma tu asistencia</h2>
                 <p class="modal-text-dark">Elige a qué número deseas escribir</p>
                 <div class="wa-options">
-                    <!-- CAMBIAR: nombre de quién recibe cada número (ej. "Mamá") -->
-                    <a class="wa-option" href="https://wa.me/18093532299" onclick="confirmWhatsApp(event, '18093532299')"><span class="wa-ico" aria-hidden="true"></span>(809) 353-2299</a>
-                    <a class="wa-option" href="https://wa.me/18298680720" onclick="confirmWhatsApp(event, '18298680720')"><span class="wa-ico" aria-hidden="true"></span>(829) 868-0720</a>
+                    <a class="wa-option" href="https://wa.me/18298680720" onclick="confirmWhatsApp(event, '18298680720')"><span class="wa-ico" aria-hidden="true"></span><span class="wa-txt"><b>Mamá de la quinceañera</b>(829) 868-0720</span></a>
+                    <a class="wa-option" href="https://wa.me/18093532299" onclick="confirmWhatsApp(event, '18093532299')"><span class="wa-ico" aria-hidden="true"></span><span class="wa-txt"><b>La quinceañera</b>(809) 353-2299</span></a>
                 </div>
             </div>
         </div>
