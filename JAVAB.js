@@ -466,7 +466,7 @@ function closeDressCodeModal() {
 
 // ---------- Regalos ----------
 // CAMBIAR: enlace de la lista de Amazon y dirección de envío
-const AMAZON_URL = '';
+const AMAZON_URL = 'https://www.amazon.com/registries/gl/guest-view/37PMUBYY6WXA9';
 function openAmazon() {
     if (AMAZON_URL) window.open(AMAZON_URL, '_blank');
     else showToast('Muy pronto', 'La lista de Amazon estará disponible en breve.');
